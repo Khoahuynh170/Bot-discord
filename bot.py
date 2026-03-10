@@ -2,8 +2,9 @@ import discord
 from discord.ext import commands
 import yt_dlp
 import asyncio
+import os
 
-TOKEN = "YOUR_TOKEN"
+TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="k!", intents=intents)
@@ -35,22 +36,17 @@ async def play_next(ctx):
             after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
         )
 
-        await ctx.send(f"🎵 Đang phát: {title}")
+        await ctx.send(f"🎵 Playing: {title}")
 
 @bot.command()
 async def join(ctx):
     if ctx.author.voice is None:
-        await ctx.send("Bạn phải vào voice channel")
+        await ctx.send("Join voice first")
         return
 
     channel = ctx.author.voice.channel
     if ctx.voice_client is None:
         await channel.connect()
-
-@bot.command()
-async def leave(ctx):
-    if ctx.voice_client:
-        await ctx.voice_client.disconnect()
 
 @bot.command()
 async def play(ctx, *, search):
@@ -72,7 +68,7 @@ async def play(ctx, *, search):
 
     queue.append(url)
 
-    await ctx.send(f"Đã thêm vào queue: {title}")
+    await ctx.send(f"Added: {title}")
 
     if not ctx.voice_client.is_playing():
         await play_next(ctx)
@@ -82,16 +78,7 @@ async def skip(ctx):
     ctx.voice_client.stop()
 
 @bot.command()
-async def pause(ctx):
-    ctx.voice_client.pause()
-
-@bot.command()
-async def resume(ctx):
-    ctx.voice_client.resume()
-
-@bot.command()
-async def stop(ctx):
-    queue.clear()
-    ctx.voice_client.stop()
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
 
 bot.run(TOKEN)
