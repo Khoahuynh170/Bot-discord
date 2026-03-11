@@ -5,7 +5,7 @@ import asyncio
 import os
 
 TOKEN = os.getenv("TOKEN")
-
+print("TOKEN LENGTH:", len(TOKEN) if TOKEN else "NONE")
 intents = discord.Intents.default()
 intents.message_content = True
 
