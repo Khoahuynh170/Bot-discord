@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 import yt_dlp
 import asyncio
-
 import os
+
 TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
@@ -33,7 +33,7 @@ async def play_music(ctx, url):
 
     voice = ctx.voice_client
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
 
     song_url = data['url']
@@ -54,7 +54,11 @@ async def join(ctx):
         return
 
     channel = ctx.author.voice.channel
-    await channel.connect()
+
+    if ctx.voice_client is not None:
+        await ctx.voice_client.move_to(channel)
+    else:
+        await channel.connect()
 
 @bot.command()
 async def leave(ctx):
@@ -88,7 +92,9 @@ async def queue_list(ctx):
     else:
         msg = "\n".join(queue)
         await ctx.send(msg)
+
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong")
+
 bot.run(TOKEN)
